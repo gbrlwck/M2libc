@@ -82,3 +82,12 @@ mode_t umask(mode_t m)
 	    "RD_A7 !166 ADDI"
 	    "ECALL");
 }
+
+
+int stat(const char* path, struct stat* buffer){
+        asm("RD_A0 !-100 ADDI" /* AT_FDCWD */
+	    "RD_A1 RS1_FP !-8 LD"
+	    "RD_A2 RS1_FP !-16 LD"
+	    "RD_A7 !1038 ADDI" /* SYS_STAT */
+	    "ECALL");
+}
