@@ -260,6 +260,44 @@ FILE* fopen(char const* filename, char const* mode)
 	return fi;
 }
 
+FILE* fdopen(int fildes, char const* mode)
+{
+	FILE* fi = calloc(1, sizeof(FILE));
+
+	if (0 > fildes){
+		return 0;
+	}
+
+	int size;
+
+	if('w' == mode[0])
+	{
+		/* Buffer as much as possible */
+		fi->buffer = malloc(BUFSIZ * sizeof(char));
+		fi->buflen = BUFSIZ;
+		fi->bufmode = O_WRONLY;
+	}
+	else
+	{
+		/* Get enough buffer to read it all */
+		size = lseek(fildes, 0, SEEK_END);
+		fi->buffer = malloc((size + 1) * sizeof(char));
+		fi->buflen = size;
+		fi->bufmode = O_RDONLY;
+
+		/* Now read it all */
+		lseek(fildes, 0, SEEK_SET);
+		read(fildes, fi->buffer, size);
+	}
+
+	fi->fd = fildes;
+	fi->next = __list;
+	if(NULL != __list) __list->prev = fi;
+	__list = fi;
+
+	return fi;
+}
+
 
 int fflush(FILE* stream)
 {
